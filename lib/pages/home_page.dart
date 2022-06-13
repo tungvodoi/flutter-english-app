@@ -2,13 +2,14 @@ import 'dart:math';
 
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/packages/quote/qoute_model.dart';
 import 'package:my_app/pages/control_page.dart';
 import 'package:my_app/values/app_assets.dart';
 import 'package:my_app/values/app_colors.dart';
 import 'package:my_app/values/app_styles.dart';
 import 'package:my_app/models/english_today.dart';
+import 'package:my_app/values/share_keys.dart';
 import 'package:my_app/widgets/app_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -43,14 +44,17 @@ class _HomePageState extends State<HomePage> {
     return newList;
   }
 
-  getEnglishToday() {
+  getEnglishToday() async {
     List<String> newList = [];
-    List<int> rans = fixedListRandom(len: 5, max: nouns.length);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int len = prefs.getInt(ShareKeys.counter) ?? 5;
+    List<int> rans = fixedListRandom(len: len, max: nouns.length);
     rans.forEach((index) {
       newList.add(nouns[index]);
     });
-
-    words = newList.map((e) => EnglishToday(noun: e)).toList();
+    setState(() {
+      words = newList.map((e) => EnglishToday(noun: e)).toList();
+    });
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -58,8 +62,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     _pageController = PageController(viewportFraction: 0.9);
-    getEnglishToday();
     super.initState();
+    getEnglishToday();
   }
 
   @override
